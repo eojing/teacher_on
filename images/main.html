@@ -1,0 +1,1631 @@
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>윤선생 ON</title>
+
+	<link rel="shortcut icon" href="/portal/resources/img/common/favicon.ico" type="image/x-icon" />
+
+	<link rel="stylesheet" type="text/css" href="/portal/resources/fonts/font.css?v=201905271345" />
+	<link rel="stylesheet" type="text/css" href="/portal/resources/css/init-intro.css?v=201905271345" />
+	<link rel="stylesheet" type="text/css" href="/portal/resources/css/layout.css?v=201905271345" />
+	
+	<link rel="stylesheet" type="text/css" href="/portal/resources/main/common.css?v=201905271345" />
+	<link rel="stylesheet" type="text/css" href="/portal/resources/main/slick.css?v=201905271345" />
+	
+	<link rel="stylesheet" type="text/css" href="/portal/resources/css/owl.carousel.min.css?v=201905271345" />
+	<link rel="stylesheet" type="text/css" href="/portal/resources/css/owl.theme.default.min.css?v=201905271345" />
+	<link rel="stylesheet" type="text/css" href="/portal/resources/assets/jqueryUI/jquery-ui.min.css" />
+	<link rel="stylesheet" type="text/css" href="/portal/resources/assets/swiper/swiper.min.css" />
+	
+	<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR:300,400,500,700&display=swap&subset=korean" rel="stylesheet">
+	
+	
+	<script src="/portal/resources/js/jquery/jquery-1.11.1.min.js"></script>
+    <script src="/portal/resources/js/jquery/jquery-ui.min.js"></script>
+	<script src="/portal/resources/js/jquery/jquery.dynatable.custom.js "></script>
+	<script src="/portal/resources/assets/jqueryUI/datepicker-ko.js "></script>
+	<script src="/portal/resources/js/utils/simpleStorage.min.js "></script>
+	
+	<script src="/portal/resources/assets/swiper/swiper.min.js "></script>
+	
+    <script src="/portal/resources/js/yoons.js?v=201905271345 "></script>
+    <script src="/portal/resources/js/yoons-api.js?v=201905271345 "></script>
+    
+    <!--
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    -->
+	<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+	
+    <script src="/portal/resources/main/slick.js"></script>
+
+	
+	<meta name="google-site-verification" content="xU4uWhGDtJaVRnliKEGQRInlzZb92LYdgUOMVSRBDq4" />
+	<!-- Google Tag Manager -->
+	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+	new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+	j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+	'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+	})(window,document,'script','dataLayer','GTM-P774VT2');</script>
+	<!-- End Google Tag Manager -->
+	
+	<!-- 그루비 메타 정보 -->
+	<meta id="groobee_member_id" property="groobee:member_id"/>
+	<meta property="groobee:member_grade" content=""/>
+	<meta id="groobee_member_gender" property="groobee:member_gender"/>
+	<meta id="groobee_member_type" property="groobee:member_type"/>
+	<meta id="groobee_member_age" property="groobee:member_age"/>
+	
+	<!-- 그루비 설정 -->
+	<script>
+	(function(a,i,u,e,o) {
+		a[u]=a[u]||function(){(a[u].q=a[u].q||[]).push(arguments)};e=i.createElement("script");e.async=1;
+		e.charset="utf-8"; e.src="//s3.ap-northeast-2.amazonaws.com/static.groobee.io/dist/groobee.min.js";
+		o=i.getElementsByTagName("script")[0]; o.parentNode.insertBefore(e,o);
+		})(window, document, "groobee");
+		groobee("serviceKey", "6243d9369c674f309af9a319604f2a14");
+		groobee("siteType", "custom");
+	</script>
+	
+
+	
+	
+	<script>
+var Api = null;
+var CONTEXT_PATH = '/portal';
+var DEPLOY_STAGE = 'deploy';
+
+$(document).ready(function(){
+
+	Api = new yoonsi.api();
+
+	// 로그아웃 처리
+	$('#logoutBtn').on('click', function() {
+
+		Api.logout(function() {
+			location.href = '/portal/page/main/main.html'
+		});
+
+	});
+
+	if ($('input[name=_reseller]').val()) {
+		simpleStorage.set('ys.reseller', {resellerCode : $('input[name=_reseller]').val() }, {TTL: 60 * 60 * 1000}); // 1시간
+	}
+
+	// 회원정보 조회
+	if (!checkAccessToken()) {
+
+		logoutClearInfo();
+		$('.user-menu').eq(0).show();
+		$('.user-menu').eq(1).hide();
+		initPage();
+
+	} else {
+		$('.user-menu').eq(0).hide();
+		$('.user-menu').eq(1).show();
+		Api.getUserCheck(function(data) {
+			if (data.status == 0) {
+				$('.user-menu').eq(0).hide();
+				$('.user-menu').eq(1).show();
+				
+				$('#groobee_member_id').attr("content", data.data.user.userId);
+				switch (data.data.user.gender){
+					case 'M':$('#groobee_member_gender').attr("content", "남자");break;
+					case 'F':$('#groobee_member_gender').attr("content", "여자");break;
+					default :$('#groobee_member_gender').attr("content", "모름");break;
+				}
+				$('#groobee_member_type').attr("content", (data.data.user.userType == '100' ? '정회원' : 'SNS회원'));
+				if(!isNull(data.data.user.birthdate)){
+					var age = calcAge(data.data.user.birthdate);
+					$('#groobee_member_age').attr("content", age);
+				}else{
+					$('#groobee_member_age').attr("content", "");
+				}
+				
+			} else {
+				logoutClearInfo();
+				$('.user-menu').eq(0).show();
+				$('.user-menu').eq(1).hide();
+			}
+			initPage();
+		});
+	}
+});
+
+/**
+ * 로그인화면으로 이동하여 로그인 후 화면 복귀
+ */
+function goLoginAndReturn() {
+
+	simpleStorage.set('ys.loginReturnPage', {location : location}, {TTL: 60 * 60 * 1000}); // 1시간
+	location.href = '/portal/page/user/login.html';
+}
+        </script>
+	
+</head>
+<body onload="">
+
+	<div class="m-menu-bg"></div>
+
+	
+
+
+<header>
+	<div class="gnb">
+		<div class="m-header">
+			<div class="menu-icon">
+				<i class="icon-ham"></i>
+			</div>
+			<h1 class="main-logo">
+				<a href="/portal/page/main/main.html">
+					<img src="/portal/resources/img/common/main_logo.gif" alt="윤선생 ON">
+				</a>
+			</h1>
+		</div>
+
+		<div class="menu-wrap">
+
+			<div class="user-wrap">
+
+				<!-- 로그인 전 -->
+				<ul class="user-menu" style="display: none;">
+					<li>
+						<a href="/portal/page/user/login.html">
+							<i class="icon-login"></i>
+							로그인
+						</a>
+					</li>
+					<li>
+						<a href="/portal/page/mypage/payStudyList.html">
+							<i class="icon-user"></i>
+							학습코드 등록
+						</a>
+					</li>
+				</ul>
+				<!-- // 로그인 전 -->
+				<!-- 로그인 후 -->
+				<ul class="user-menu" style="display: none;">
+					<li>
+						<a id="logoutBtn">
+							<i class="icon-login"></i>
+							로그아웃
+						</a>
+					</li>
+					<li>
+						<a href="/portal/page/mypage/payStudyList.html">
+							<i class="icon-user"></i>
+							학습코드 등록
+						</a>
+					</li>
+				</ul>
+				<!-- // 로그인 후 -->
+			</div>
+
+			<div class="gnb-wrap">
+				<!-- mobile 메뉴 -->
+				<ul class="m-gnb-menu">
+					<li class="d1">
+						<div class="d1-txt">
+							<a href="javascript:void(0);">상품소개</a>
+						</div>
+						<ul class="d2-wrap">
+							<li>
+								<a href="/portal/page/main/introApp.html" class="cho">초통영</a>
+								<ul class="d3-wrap">
+									<li><a href="/portal/page/main/introPhonics.html">파닉스</a></li>
+									<li><a href="/portal/page/main/introSpeak.html">말하기</a></li>
+									<li><a href="/portal/page/main/introChotong.html">마스터 패키지</a></li>
+									<li><a href="/portal/page/main/introReadingpatten.html">리딩/패턴 플러스</a></li>
+									<li><a href="/portal/page/main/introCho3full.html">초3만점 패키지</a></li>
+									
+									<li><a href="/portal/page/main/introOutput.html">아웃풋코칭서비스</a></li>
+								</ul>
+							</li>
+							<li>
+								<a href="/portal/page/main/introBus.html" class="bus">스피킹버스</a>
+							</li>
+							<li>
+								<a href="/portal/page/main/introSpeakingTok.html" class="tok">스피킹톡</a>
+							</li>
+						</ul>
+					</li>
+					<li class="d1">
+						<div class="d1-txt">
+							<a href="javascript:void(0);">구매하기</a>
+						</div>
+						<ul class="d2-wrap">
+							<li>
+								<a href="/portal/page/prod/choList.html?saleProdGb=300" class="cho">초통영</a>
+								<ul class="d3-wrap">
+									<li><a href="/portal/page/prod/choList.html?menu=4">파닉스</a></li>
+									<li><a href="/portal/page/prod/choList.html?menu=5">말하기</a></li>
+									<li><a href="/portal/page/prod/choList.html?menu=6">마스터 패키지</a></li>
+									<li><a href="/portal/page/prod/choList.html?menu=7">리딩/패턴 플러스</a></li>
+									<li><a href="/portal/page/prod/choList.html?menu=8">초3만점 패키지</a></li>
+									
+									<li><a href="/portal/page/prod/coachDetail.html">아웃풋코칭서비스</a></li>
+								</ul>
+							</li>
+							<li>
+								<a href="/portal/page/prod/speakingBusList.html" class="bus">스피킹버스</a>
+							</li>
+							<li>
+								<a href="/portal/page/prod/speakingTokList.html" class="tok">스피킹톡</a>
+							</li>
+						</ul>
+					</li>
+					<li class="d1_none">
+						<div class="d1-txt">
+							<a href="/portal/page/bbs/eventList.html">이벤트</a>
+						</div>
+					</li>
+								
+					<li class="d1">
+						<div class="d1-txt">
+							<a href="javascript:void(0);">고객센터</a>
+						</div>
+						<ul class="d2-wrap">
+							<li>
+								<a href="/portal/page/bbs/noticeList.html">공지사항</a>
+							</li>
+							<li>
+								<a href="/portal/page/bbs/faqList.html">자주묻는 질문</a>
+							</li>
+							<li>
+								<a href="/portal/page/bbs/inquiry.html">단체할인/제휴문의</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<!-- //mobile 매뉴 -->
+
+				<!-- pc 매뉴 -->
+				<ul class="pc-gnb-menu">
+					<li class="d1">
+						<div class="d1-txt">
+							<a href="/portal/page/main/introApp.html">상품소개</a>
+						</div>
+					</li>
+					<li class="d1">
+						<div class="d1-txt">
+							<a href="/portal/page/prod/prodMain.html">구매하기</a>
+						</div>
+					</li>
+					<li class="d1">
+						<div class="d1-txt">
+							<a href="/portal/page/bbs/eventList.html">이벤트</a>
+						</div>
+					</li>
+					<li class="d1">
+						<div class="d1-txt">
+							<a href="/portal/page/bbs/noticeList.html">고객센터</a>
+						</div>
+					</li>
+				</ul>
+				<!-- //pc 매뉴 -->
+			</div>
+		</div><!-- //menu-wrap -->
+	</div><!-- //gnb -->
+</header>
+
+
+    
+
+<!-- 메인 -->
+<script type="text/javascript">
+
+$(document).ready(function(){
+
+
+	AOS.init();
+
+	$("#footer_top").on("click",function(){
+		$( 'html, body' ).animate( { scrollTop : 0 }, 400 );
+	});
+
+
+	$('.section021 .arrow_box').click(function(){
+		
+		var tab_id = $(this).attr('data-tab');
+
+		$('.section021 .arrow_box').removeClass('current');
+		$('.section021 .tab-content').removeClass('current');
+	 
+		$(this).addClass('current');
+		$("#"+tab_id).addClass('current');
+	 });
+	 $('.section041 .arrow_box').click(function(){
+		
+		var tab_id = $(this).attr('data-tab');
+
+		$('.section041 .arrow_box').removeClass('current');
+		$('.section041 .tab-content').removeClass('current');
+	 
+		$(this).addClass('current');
+		$("#"+tab_id).addClass('current');
+	 });
+
+	 $(".btnPlus01").on("click",function(){
+		 console.log($(".section02").offset().top);
+		 $('html, body').animate({scrollTop : $(".section02.pc").offset().top-50}, 400);
+	 });
+
+	 $(".btnPlus02").on("click",function(){
+		 console.log($(".section02").offset().top);
+		 $('html, body').animate({scrollTop : $(".section04.pc").offset().top-50}, 400);
+	 });
+
+	 $(".btnPlus03").on("click",function(){
+		 console.log($(".section02").offset().top);
+		 $('html, body').animate({scrollTop : $(".section02.mobile").offset().top-50}, 400);
+	 });
+
+	 $(".btnPlus04").on("click",function(){
+		 console.log($(".section02").offset().top);
+		 $('html, body').animate({scrollTop : $(".section04.mobile").offset().top-50}, 400);
+	 });
+	var swiper0 = new Swiper('.section01 .pack_wrap', {
+		slidesPerView: 'auto',
+		pagination: {
+			el: '.section01 .pack_wrap .swiper-pagination',
+			clickable: true,
+		},
+		speed: 400,
+		loop: true,
+
+		autoplay: {
+			delay: 3000,
+		}
+	});
+	 var swiper1 = new Swiper('.section02 .pack_wrap', {
+	    slidesPerView: 'auto',
+		 centeredSlides: true,
+	    pagination: {
+	      el: '.section02 .swiper-pagination',
+	      clickable: true,
+	    },
+		 spaceBetween: 7,
+		speed: 400,
+		loop: true,
+	
+		autoplay: {
+			delay: 3000,
+		}
+	});
+	var swiper_2 = new Swiper('.section03 .pack_wrap', {
+		slidesPerView: 'auto',
+		pagination: {
+			el: '.section03 .swiper-pagination',
+			clickable: true,
+		},
+		spaceBetween: 20,
+		speed: 400,
+		loop: true,
+		navigation: {
+			nextEl: '.section03 .swiper-button-next',
+			prevEl: '.section03 .swiper-button-prev',
+		},
+		autoplay: {
+			delay: 3000,
+		}
+	});
+	 var swiper2 = new Swiper('.section04 .pack_wrap', {
+	    slidesPerView: 'auto',
+		 pagination: {
+			 el: '.section04 .swiper-pagination',
+			 clickable: true,
+		 },
+		 navigation: {
+			 nextEl: '.section04 .swiper-button-next',
+			 prevEl: '.section04 .swiper-button-prev',
+		 },
+		speed: 400,
+		loop: true,
+	
+		autoplay: {
+			delay: 3000,
+		}
+	});
+	 var swiper3 = new Swiper('.section05 .pack_wrap', {
+	    slidesPerView: 'auto',
+	    pagination: {
+	      el: '.section05 .swiper-pagination',
+	      clickable: true,
+	    },
+		 spaceBetween: 20,
+		speed: 400,
+		loop: true,
+	
+		autoplay: {
+			delay: 3000,
+		}
+	});
+
+	var swiper33 = new Swiper('.sc05_box3 .pack_wrap', {
+		slidesPerView: 'auto',
+		pagination: {
+			el: '.sc05_box3 .swiper-pagination',
+			clickable: true,
+		},
+		spaceBetween: 20,
+		speed: 400,
+		loop: true,
+
+		autoplay: {
+			delay: 3000,
+		}
+	});
+
+	var swiper0 = new Swiper('.section06 .pack_wrap', {
+		slidesPerView: 'auto',
+		pagination: {
+			el: '.section06 .swiper-pagination',
+			clickable: true,
+		},
+		navigation: {
+			nextEl: '.section06 .swiper-button-next',
+			prevEl: '.section06 .swiper-button-prev',
+		},
+		speed: 400,
+		loop: true,
+
+		autoplay: {
+			delay: 3000,
+		}
+	});
+	var swiper4 = new Swiper('.section07 .pack_wrap', {
+		slidesPerView: 'auto',
+		pagination: {
+			el: '.section07 .swiper-pagination',
+			clickable: true,
+		},
+		navigation: {
+			nextEl: '.section07 .swiper-button-next',
+			prevEl: '.section07 .swiper-button-prev',
+		},
+		speed: 400,
+		loop: true,
+
+		autoplay: {
+			delay: 3000,
+		}
+	});
+	$(".popview").on("click",function(){
+		$this = $(this);
+		$(".bgfix").fadeIn();
+		$("." + $(this).attr("data-pop")).fadeIn();
+
+
+	});
+
+	$(".popup .close").on("click",function(){
+		$(".bgfix").fadeOut();
+		$(".popup").fadeOut();
+	});
+
+	$(".slick_box").slick({
+		dots: true,
+		responsive: [
+			{
+				settings: {
+					centerMode: true,
+					centerPadding: '100px',
+				}
+			}
+		]
+	});
+
+	$(".section07.mobile .slick-next").html("<img src='./images/arrow_mright.png' >");
+	$(".section07.mobile .slick-prev").html("<img src='./images/arrow_mleft.png' >");
+	$(".sc-fzoCUK").children().on("click",function(e){
+		e.preventDefault();
+		var idx = $(this).index();
+
+		$('#slick-slide-control0'+idx).click();
+
+		$(this).addClass('active').siblings().removeClass('active');
+
+		console.log()
+		$('.sc-AxhUy').css({
+
+			transform: "translateX("+(idx*100)+"%)"
+			
+		})
+		//
+	});
+	$(".modal .close").click(function() {
+		$("#myModal").css({
+			"display": "none"
+		});
+	});
+
+	$("html").click(function(event) {
+		if (event.target.id === "myModal") {
+			$("#myModal").css({
+				"display": "none"
+			});
+		}
+	});
+
+	function numberCounter(target_frame, target_number) {
+		this.count = 0; this.diff = 0;
+		this.target_count = parseInt(target_number);
+		this.target_frame = document.getElementById(target_frame);
+		this.timer = null;
+		this.counter();
+	};
+	numberCounter.prototype.counter = function() {
+		var self = this;
+		this.diff = this.target_count - this.count;
+
+		if(this.diff > 0) {
+			self.count += Math.ceil(this.diff / 5);
+		}
+
+		this.target_frame.innerHTML = this.count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+		if(this.count < this.target_count) {
+			this.timer = setTimeout(function() { self.counter(); }, 20);
+		} else {
+			clearTimeout(this.timer);
+		}
+	};
+	new numberCounter("counter1", 18084972);
+	new numberCounter("counter2", 5000000);
+	new numberCounter("counter3", 18084972);
+	new numberCounter("counter4", 5000000);
+
+
+
+
+});
+$(window).scroll(function() {
+	var scroll = $(document).scrollTop();
+	var minusH = $(document).innerHeight() / 10;
+
+	var target1 = $('.sc05_box1').offset().top;
+	var target2 = $('.sc05_box2').offset().top;
+	var target3 = $('.sc05_box3').offset().top;
+
+	console.log(scroll > target3 - minusH);
+	if (scroll > target1 - minusH) {
+		$('.sc05_box1').addClass('move');
+
+	}
+	if (scroll > target2 - minusH) {
+		$('.sc05_box2').addClass('move');
+	}
+	if (scroll > target3 - minusH) {
+
+		$('.sc05_box3').addClass('move');
+	}
+});
+function free_modal(){
+	$("#myModal").css({
+		"display": "block"
+	});
+}
+function initPage(){
+	
+	popupNotice();
+	
+	if (!checkAccessToken()) {
+		return;
+	}
+
+	Api.getOutputEventAvail(function(data) {
+
+		if (data.status == 0) {
+			// 원스탑결제 교재만 구매한 경우 팝업
+			if(data.data.userOneStop){
+				popupMsgConfirm(POP_MSG.MSG_3020, function() { location.href="/portal/v1/order/order/getOneStopMain.html?bookOrderNum="
+					+data.data.userOneStop.bookOrderNum + "&coachOrderNum=" +data.data.userOneStop.coachingOrderNum; });
+			}
+			/*
+			else if (data.data.result != 0) {
+
+				popupOutputCoach(function() {
+					location.href="/portal/page/main/introOutput.html";
+				}, function() {
+
+					var event = {};
+					event.boardType = '200';//게시판 타입이 이벤트
+					event.boardSubType = '203';//201:소스모집, 202:체험교재, 203:아웃풋코칭
+					event.boardSeq = 2;//상시이벤트게시판 번호(1:교재체험, 2:아웃풋코칭)
+
+					Api.createEventAttend(event, {}, null,
+						function(data) {
+							if (data.status == 0) {
+								if(data.data.result == 1){
+									popupMsgConfirm(POP_MSG.MSG_2001);
+									//alert("이벤트 참여를 완료하였습니다.");
+								} else if(data.data.result == 0){
+									popupMsgConfirm(POP_MSG.MSG_2002);
+									//alert("이미 참여한 이벤트입니다.");
+								} else if(data.data.result == 2){
+									popupMsgConfirm(POP_MSG.MSG_2011);
+									//alert("학습코드가 없습니다. 신청 후 다시 이용 바랍니다.");
+								}
+							} else if (data.status == 3405){
+								popupMsgConfirm(POP_MSG.MSG_2013);
+							} else {
+								alert(data.debug.message);
+							}
+						}
+					);
+					
+
+				});
+			}
+			*/
+		}
+	});
+}
+
+function goIntroPage(){
+	location.href="/portal/page/main/introChotong.html";
+}
+
+function goBookEventPage(){
+	location.href="/portal/page/landing/bookEvent.html";
+}
+
+function goReviewPage(){
+	location.href="/portal/page/review/reviewList.html";
+}
+function goLotteCardEventPage(){
+	location.href="/portal/page/bbs/eventDetail.html?boardSeq=101&boardType=200&boardSubType=202&eventType=100";
+}
+function go7EventPage(){
+	location.href="/portal/page/bbs/eventDetail.html?boardSeq=113&boardType=200&boardSubType=202&eventType=100";
+}
+function goEventPage8(){
+	location.href="/portal/page/bbs/eventDetail.html?boardSeq=119&boardType=200&boardSubType=202&eventType=100";
+}
+function goSpeakingBusPage(){
+	location.href="/portal/page/main/introBus.html";
+}
+</script>
+
+<div class="section section01 pc">
+	<div class=" pack_wrap" style="position:relative;overflow:hidden;">
+		<div class="swiper-pagination"></div>
+		<div class="pack_box swiper-wrapper">
+			<!-- 윤선생ON 배너 -->
+			<div class="swiper-slide pack_slide">
+				<a href="javascript:void(0);"><img src="/portal/resources/img/banner/w_rolling_banner01.jpg" /></a>
+			</div>
+			<!-- 스피킹톡 배너 -->
+			<div class="swiper-slide pack_slide">
+				<a href="/portal/page/main/introSpeakingTok.html"><img src="/portal/resources/img/banner/w_rolling_banner02.jpg" /></a>
+			</div>
+			<!-- 스피킹버스 배너 -->
+			<div class="swiper-slide pack_slide">
+				<a href="/portal/page/main/introBus.html"><img src="/portal/resources/img/banner/w_rolling_banner03.jpg" /></a>
+			</div>
+			<!-- 초통영 배너 -->
+			<div class="swiper-slide pack_slide">
+				<a href="/portal/page/main/introApp.html"><img src="/portal/resources/img/banner/w_rolling_banner04.jpg" /></a>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="section section01 mobile">
+	<div class=" pack_wrap" style="position:relative;overflow:hidden;">
+		<div class="swiper-pagination"></div>
+		<div class="pack_box swiper-wrapper">
+			<!-- 윤선생ON 배너 -->
+			<div class="swiper-slide pack_slide">
+				<a href="javascript:void(0);"><img src="/portal/resources/img/banner/m_rolling_banner01.jpg" /></a>
+			</div>
+			<!-- 스피킹톡 배너 -->
+			<div class="swiper-slide pack_slide">
+				<a href="/portal/page/main/introSpeakingTok.html"><img src="/portal/resources/img/banner/m_rolling_banner02.jpg" /></a>
+			</div>
+			<!-- 스피킹버스 배너 -->
+			<div class="swiper-slide pack_slide">
+				<a href="/portal/page/main/introBus.html"><img src="/portal/resources/img/banner/m_rolling_banner03.jpg" /></a>
+			</div>
+			<!-- 초통영 배너 -->
+			<div class="swiper-slide pack_slide">
+				<a href="/portal/page/main/introApp.html"><img src="/portal/resources/img/banner/m_rolling_banner04.jpg" /></a>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="section section02 pc">
+	<div class="prt_title">학교영어부터 생활영어까지<br/>전국민 영어두뇌 만들기 프로젝트<br/></div>
+	<h2>스마트폰만 있다면 <span>언제 어디서든 OK!</span></h2>
+	<p><strong>“40년간 국내 1위!”</strong><br/>영어 교육 전문기업 윤선생이 만든 온라인 전용 학습 브랜드 </p>
+	<div class="sc02box">
+		<a href="/portal/page/main/introApp.html"><img src="/portal/resources/img/main/sc0201.png" /></a>
+		<a href="/portal/page/main/introBus.html"><img src="/portal/resources/img/main/sc0202.png" /></a>
+		<a href="/portal/page/main/introSpeakingTok.html"><img src="/portal/resources/img/main/sc0203.png" /></a>
+	</div>
+	<p>파닉스부터 스피킹까지<br/>영어를 제대로 완성하고 싶으시다면?<br/>지금 바로 <span>윤선생 ON과 함께하세요!</span><br/>에듀테크가 결합된 새로운 윤선생과 함께라면 영어가 즐거워집니다.</p>
+
+</div>
+<div class="section section02 mobile">
+	<div class="wrap">
+		<div class="prt_title">학교영어부터 생활영어까지<br/>전국민 영어두뇌 만들기 프로젝트<br/></div>
+		<h2>스마트폰만 있다면 <br><span>언제 어디서든 OK!</span></h2>
+		<p><strong>“40년간 국내 1위!”</strong><br/>영어 교육 전문기업 윤선생이 만든<br> 온라인 전용 학습 브랜드 </p>
+	</div>
+		<div class=" pack_wrap" style="position:relative;overflow:hidden;padding-bottom:40px;">
+			<div class="swiper-pagination"></div>
+			<div class="pack_box swiper-wrapper">
+				<div class="swiper-slide pack_slide">
+					<a href="/portal/page/main/introApp.html"><img src="/portal/resources/img/main/m_sc0201.png" /></a>
+				</div>
+				<div class="swiper-slide pack_slide">
+					<a href="/portal/page/main/introBus.html"><img src="/portal/resources/img/main/m_sc0202.png" /></a>
+				</div>
+				<div class="swiper-slide pack_slide">
+					<a href="/portal/page/main/introSpeakingTok.html"><img src="/portal/resources/img/main/m_sc0203.png" /></a>
+				</div>
+			</div>
+		</div>
+	<div class="wrap">
+		<p>파닉스부터 스피킹까지<br/>영어를 제대로 완성하고 싶으시다면?<br/>지금 바로 <span>윤선생 ON과 함께하세요!</span><br/>에듀테크가 결합된 새로운 윤선생과<br> 함께라면 영어가 즐거워 집니다.</p>
+	</div>
+</div>
+
+<div class="section section03 pc">
+	<div class="wrap">
+		<div class="prt_title"><img src="/portal/resources/img/main/m_sc_03_logo.png" /></div>
+		<p>예비초등생부터 왕초보 성인까지,<br/>수준별 커리큘럼이 준비되어 있습니다.</p>
+
+		<img src="/portal/resources/img/main/sc0300.png" class="sct0300" />
+		
+		<img src="/portal/resources/img/main/sc0301.png" class="sct03" />
+		<div class="wrap03">
+			<a href="/portal/page/prod/choDetail.html?menu=4&tab=10&saleProdSeq=3"><img src="/portal/resources/img/main/sc0302.png" /></a>
+			<a href="/portal/page/prod/choDetail.html?menu=5&tab=12&saleProdSeq=2"><img src="/portal/resources/img/main/sc0303.png" /></a>
+			<a href="/portal/page/prod/choDetail.html?menu=7&tab=&saleProdSeq=31"><img src="/portal/resources/img/main/sc0304.png" /></a>
+			<a href="/portal/page/prod/choDetail.html?menu=7&tab=&saleProdSeq=32"><img src="/portal/resources/img/main/sc0305.png" /></a>
+			<a href="/portal/page/prod/choDetail.html?menu=8&tab=&saleProdSeq=53"><img src="/portal/resources/img/main/sc0306.png" /></a>
+			<a href="/portal/page/prod/choDetail.html?menu=6&tab=&saleProdSeq=34"><img src="/portal/resources/img/main/sc0307.png" /></a>
+		</div>
+	</div>
+</div>
+
+<div class="section section03 mobile">
+	<div class="wrap">
+		<div class="prt_title"><img src="/portal/resources/img/main/m_sc_03_logo.png" class="sct0300" /></div>
+		<p>예비초등생부터 왕초보 성인까지,<br/>수준별 커리큘럼이 준비되어 있습니다.</p>
+		<img src="/portal/resources/img/main/sc0300.png" class="sct0300" />
+		
+		<img src="/portal/resources/img/main/m_sc0300.png" class="sct0301" />
+		<p class="sct0302">영어의 기본기를 다지고<br>영어 자신감을 키워주는<br>
+			초등 영어 전문 프로그램</p>
+		<img src="/portal/resources/img/main/m_sc0301.png" class="sct03" />
+		<p class="sct0303">※ 초통영은 안드로이드 기반 스마트폰 및 태블릿에서 학습이 가능한 상품으로, 각 과정별 학습 교재와 교구로 구성되어 있습니다. (구글 플레이스토어에서 ‘초통영’을 검색하세요!)</p>
+		<div class=" pack_wrap" style="position:relative;overflow:hidden;padding-bottom:40px;">
+			<div class="swiper-pagination"></div>
+			<div class="pack_box swiper-wrapper">
+				<div class="swiper-slide pack_slide">
+					<a href="/portal/page/prod/choDetail.html?menu=4&tab=10&saleProdSeq=3"><img src="/portal/resources/img/main/m_sc0302.png" /></a>
+				</div>
+				<div class="swiper-slide pack_slide">
+					<a href="/portal/page/prod/choDetail.html?menu=5&tab=12&saleProdSeq=2"><img src="/portal/resources/img/main/m_sc0303.png" /></a>
+				</div>
+				<div class="swiper-slide pack_slide">
+					<a href="/portal/page/prod/choDetail.html?menu=7&tab=&saleProdSeq=31"><img src="/portal/resources/img/main/m_sc0304.png" /></a>
+				</div>
+				<div class="swiper-slide pack_slide">
+					<a href="/portal/page/prod/choDetail.html?menu=7&tab=&saleProdSeq=32"><img src="/portal/resources/img/main/m_sc0305.png" /></a>
+				</div>
+				<div class="swiper-slide pack_slide">
+					<a href="/portal/page/prod/choDetail.html?menu=8&tab=&saleProdSeq=53"><img src="/portal/resources/img/main/m_sc0306.png" /></a>
+				</div>
+				<div class="swiper-slide pack_slide">
+					<a href="/portal/page/prod/choDetail.html?menu=6&tab=&saleProdSeq=34"><img src="/portal/resources/img/main/m_sc0307.png" /></a>
+				</div>
+
+			</div>
+			<img src="/portal/resources/img/main/arrow_mleft.png" class="swiper-button-prev" />
+			<img src="/portal/resources/img/main/arrow_mright.png" class="swiper-button-next" />
+		</div>
+	</div>
+</div>
+
+<div class="section section04 pc">
+	<div class="wrap">
+		<img src="/portal/resources/img/main/sc0400.png" class="sct04" />
+		
+		<img src="/portal/resources/img/main/sc0401.png" class="sct04" />
+		<div class="wrap04">
+			<a href="/portal/page/prod/speakingBusDetail.html?menu=2&tab=16&saleProdSeq=66&saleProdItemSeq=133"><img src="/portal/resources/img/main/sc0402.png" /></a>
+			<a href="/portal/page/prod/speakingTokDetail.html?menu=3&tab=19&saleProdSeq=81&saleProdItemSeq=147"><img src="/portal/resources/img/main/sc0403.png" /></a>
+		</div>
+	</div>
+</div>
+
+<div class="section section04 mobile">
+	<div class="wrap">
+		<img src="/portal/resources/img/main/sc0400.png" class="sct0400" />
+		
+		<img src="/portal/resources/img/main/m_sc0401_1.png" class="sct040101" />
+		<h3 class="sct040101t">스피킹 버스</h3>
+		<p class="sct040101p">일상에서 가장 많이 쓰이는<br> 패턴 80개를 배우는 과정</p>
+		<img src="/portal/resources/img/main/m_sc0401_3.png" class="sct04" />
+		<p class="sct0403">※ 안드로이드 기반 스마트폰 및 태블릿에서 학습이 가능한 상품으로, 구글 플레이스토어에서 ‘스피킹버스 - 신나는 말하기 훈련’을 다운 받으시면 무료체험이 가능합니다.</p>
+		<img src="/portal/resources/img/main/m_sc0401_2.png" class="sct040101" />
+		<h3 class="sct040101t">스피킹톡</h3>
+		<p class="sct040101p">Google 어시스턴트 기반의 영어 스피킹 과정</p>
+		<img src="/portal/resources/img/main/m_sc0401_4.png" class="sct04" />
+		<p class="sct0403" style="margin-bottom: 5px;">※ 스피킹톡은 별도의 앱 설치 없이 Google 어시스턴트가 설치된 기기에서 “Ok Google, 윤선생 불러 줘＂를 말하면 체험할 수 있습니다.</p>
+		<p class="sct0403">※ 스피킹톡은 Google 어시스턴트가 작동하는 Android 기기에서만 이용 가능합니다. iOS 기반(iPhone 또는 iPad)에서는 사용하실 수 없습니다.</p>
+		<div class=" pack_wrap" style="position:relative;overflow:hidden;padding-bottom:40px;">
+			<div class="swiper-pagination"></div>
+			<div class="pack_box swiper-wrapper">
+				<div class="swiper-slide pack_slide">
+					<a href="/portal/page/prod/speakingBusDetail.html?menu=2&tab=16&saleProdSeq=66&saleProdItemSeq=133"><img src="/portal/resources/img/main/m_sc0401.png" /></a>
+				</div>
+				<div class="swiper-slide pack_slide">
+					<a href="/portal/page/prod/speakingTokDetail.html?menu=3&tab=19&saleProdSeq=81&saleProdItemSeq=147"><img src="/portal/resources/img/main/m_sc0402.png" /></a>
+				</div>
+
+			</div>
+			<img src="/portal/resources/img/main/arrow_mleft.png" class="swiper-button-prev" />
+			<img src="/portal/resources/img/main/arrow_mright.png" class="swiper-button-next" />
+		</div>
+	</div>
+</div>
+
+<div class="section section05 pc">
+	<img src="/portal/resources/img/main/back_sc05_left.png" class="sc05_left"/>
+	<img src="/portal/resources/img/main/back_sc05_right.png" class="sc05_right"/>
+	<img src="/portal/resources/img/main/sc0501.png" />
+	<h2>윤선생 ON은 윤선생의 새로운 40년을 이끌어갑니다.</h2>
+	<p>40년 동안 영어교육 외길을 걸어온 윤선생이<br>최적화된 온라인 학습 상품들을 만들었습니다.<br>윤선생 온라인을 통해 손쉽게 언제 어디서나 영어를 만나보세요!</p>
+	<div class="sc05_box1">
+		<div class="check">CHECK1</div>
+		<h3 >윤선생이 <span class="txt-highlight" >영어 교육 전문 기업인</span> 이유!</h3>
+		<div class="box1_inbox">
+			<div class="box1_inbox2">
+				<div class="box1_left">
+					<img src="/portal/resources/img/main/sc0502.png" class="inbox_img"/>
+					<h4><span id="counter1" class="counter"></span>권</h4>
+					<h5>윤선생 파닉스 교재 누적 판매량</h5>
+					<p>익숙한 영어 소리와 글자의 연결<br/>파닉스(Phonics)를 국내 최초 도입</p>
+				</div>
+				<div class="box1_right">
+					<img src="/portal/resources/img/main/sc0503.png" class="inbox_img"/>
+					<h4><span id="counter2" class="counter"></span>명</h4>
+					<h5>윤선생 누적 회원 수</h5>
+					<p>전국민 열 명 중 한 명은<br/>윤선생으로 영어두뇌 만들기 경험</p>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="sc05_box2">
+		<div class="check">CHECK2</div>
+		<h3><span class="txt-highlight" >고객들이 직접 뽑은</span> 증명된 윤선생의 강점!</h3>
+		<div class="box2_inbox">
+			<div class="box2_box1">
+				<div class="box2_box1_bar div-highlight div-highlight1">
+					<p class="percent">46.1%</p>
+					<p class="">듣기,말하기,읽기,쓰기 영역별로 다양한 교재</p>
+				</div>
+				<div class="box2_box2_bar div-highlight div-highlight2">
+					<p class="percent">44.2%</p>
+					<p class="">미취학부터 성인까지 폭넓은 커리큘럼 보유</p>
+				</div>
+				<div class="box2_box3_bar div-highlight div-highlight3">
+					<p class="percent">27.9%</p>
+					<p class="">따라 읽고 말하는 반복학습법</p>
+				</div>
+
+			</div>
+		</div>
+	</div>
+	<div class="sc05_box3">
+		<div class="check">CHECK3</div>
+		<h3><img src="/portal/resources/img/main/m_sc0508_h3.png" /></h3>
+		<img src="/portal/resources/img/main/sc0504.png" />
+	</div>
+</div>
+<div class="section section05 mobile ">
+	<div class="wrap">
+		<img src="/portal/resources/img/main/m_sc0500.png" class="sc0500"/>
+		<img src="/portal/resources/img/main/m_sc0501.png" class="sc0501"/>
+		<h2>윤선생 ON은 윤선생의<br>새로운 40년을 이끌어갑니다.</h2>
+		<p>40년 동안 영어교육<br>외길을 걸어온 윤선생이<br>최적화된 온라인 학습 상품들을<br>만들었습니다.<br>윤선생 온라인을 통해 손쉽게<br>언제 어디서나 영어를 만나보세요!</p>
+		<div class="sc05_box1">
+			<div class="check">CHECK1</div>
+			<h3 >윤선생이 <br><span class="txt-highlight" >영어 교육 전문 기업인</span> 이유!</h3>
+			<div class="box1_inbox">
+				<div class="box1_inbox2">
+					<div class="box1_left">
+						<img src="/portal/resources/img/main/m_sc0502.png" class="inbox_img"/>
+						<h4><span id="counter3" class="counter"></span>권</h4>
+						<h5>윤선생 파닉스 교재<br>누적 판매량</h5>
+						<p>익숙한 영어 소리와<br>글자의 연결<br>파닉스를 국내 최초 도입</p>
+					</div>
+					<div class="box1_right">
+						<img src="/portal/resources/img/main/m_sc0503.png" class="inbox_img"/>
+						<h4><span id="counter4" class="counter"></span>명</h4>
+						<h5>윤선생 <br/>누적 회원 수</h5>
+						<p>전국민 열 명 중 한 명은<br/> 윤선생으로 영어두뇌 <br>만들기 경험</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="sc05_box2">
+			<div class="check">CHECK2</div>
+			<h3><span class="txt-highlight" >고객들이 직접 뽑은</span><br>증명된 윤선생의 강점!</h3>
+			<div class="box2_inbox">
+				<div class="box2_box1">
+					<div class="box2_box1_bar div-highlight div-highlight1">
+						<p><strong>46.1%</strong><br>듣기,말하기,읽기,쓰기 영역별로 다양한 교재</p>
+					</div>
+					<div class="box2_box2_bar div-highlight div-highlight2">
+						<p><strong>44.2%</strong><br>미취학부터 성인까지<br> 폭넓은 커리큘럼 보유</p>
+					</div>
+					<div class="box2_box3_bar div-highlight div-highlight3">
+						<p><strong>27.9%</strong><br>따라읽고 말하는 반복학습법</p>
+					</div>
+
+				</div>
+			</div>
+		</div>
+		<div class="sc05_box3">
+			<div class="check">CHECK3</div>
+			<!--<h3>윤선생 ON은 엄마들의 <br>냉정한 평가를 바탕으로<br><span class="txt-highlight">체계적인 학습법을</span><br>끊임없이 연구합니다.</h3>-->
+			<h3><img src="/portal/resources/img/main/m_sc0508_h3.png" /></h3>
+			<div class=" pack_wrap" style="position:relative;overflow:hidden;padding-bottom:40px;">
+				<div class="swiper-pagination"></div>
+				<div class="pack_box swiper-wrapper">
+					<div class="swiper-slide pack_slide">
+						<img src="/portal/resources/img/main/m_sc0508_1.png" />
+					</div>
+					<div class="swiper-slide pack_slide">
+						<img src="/portal/resources/img/main/m_sc0508_2.png" />
+					</div>
+					<div class="swiper-slide pack_slide">
+						<img src="/portal/resources/img/main/m_sc0508_3.png" />
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="section section06 pc">
+	<img src="/portal/resources/img/main/m_sc06_logo.png" />
+	<p>윤선생 모든 브랜드의 다양한 소식을 전해드립니다.<br/>최신 교육 정보도 함께 확인하세요!</p>
+	<div class="sc06box">
+		<a href="https://bit.ly/31wsRle" target="_blank"><img src="/portal/resources/img/main/sc0601.png" /></a>
+		<a href="https://bit.ly/3ijV1Xk" target="_blank"><img src="/portal/resources/img/main/sc0602.png" /></a>
+		<a href="https://bit.ly/31mMwEg" target="_blank"><img src="/portal/resources/img/main/sc0603.png" /></a>
+	</div>
+</div>
+<div class="section section06 mobile">
+	<div class="wrap">
+		<img src="/portal/resources/img/main/m_sc06_logo.png" class="m_sc06_logo" />
+		<p>윤선생 모든 브랜드의<br>다양한 소식을 전해드립니다.<br/>최신 교육 정보도<br/>함께 확인하세요!</p>
+		<div class=" pack_wrap" style="position:relative;overflow:hidden;padding-bottom:40px;">
+			<div class="swiper-pagination"></div>
+			<div class="pack_box swiper-wrapper">
+				<div class="swiper-slide pack_slide">
+					<a href="https://bit.ly/31wsRle" target="_blank"><img src="/portal/resources/img/main/m_sc0601.png" /></a>
+				</div>
+				<div class="swiper-slide pack_slide">
+					<a href="https://bit.ly/3ijV1Xk" target="_blank"><img src="/portal/resources/img/main/m_sc0602.png" /></a>
+				</div>
+				<div class="swiper-slide pack_slide">
+					<a href="https://bit.ly/31mMwEg" target="_blank"><img src="/portal/resources/img/main/m_sc0603.png" /></a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="footer_ba" class="pc">
+
+	<div class="wrap">
+
+		<p><img src="/portal/resources/img/main/m_footlogo.png" /> 오픈 기념 이벤트 진행 중</p>
+		
+		<a href="/portal/page/bbs/eventList.html" target="_blank"><img style="border:0px;" src="/portal/resources/img/main/btnFooter.png" /></a>
+	</div>
+</div>
+<div id="footer_ba" class="mobile">
+	<div class="wrap">
+		<p><img src="/portal/resources/img/main/m_footlogo.png" /> 오픈 기념 이벤트 진행 중</p>
+		
+		<a href="/portal/page/bbs/eventList.html" target="_blank"><img style="border:0px;" src="/portal/resources/img/main/m_btnFotter.png" /></a>
+	</div>
+</div>
+
+<div id="footer_top" class="mobile mbtn_top">TOP<i class="icon-top"></i></div>
+
+
+<div class="bgfix"></div>
+
+<!-- The Modal -->
+<div id="myModal" class="modal">
+
+	<!-- Modal content -->
+	<div id="modal-content" class="modal-content">
+		<span class="close">×</span>
+		<a href="#" ><img src="/portal/resources/speakingTok/images/free_modal.jpg"></a>
+	</div>
+
+</div>
+
+
+    
+
+	
+<script>
+// 메시지 팝업 유형
+var POP_MSG = {
+
+	// 일반메시지
+	MSG_1001 : { t: "", m: "서비스 연결이 원활하지 않습니다.", b: "확인" }
+	,MSG_1002 : { t: "", m: "잘못된 접근입니다.", b: "확인" }
+	,MSG_1003 : { t: "", m: "약관에 동의하지 않으셨습니다.<br>약관에 동의해 주시기 바랍니다.", b: "확인" }
+	,MSG_1004 : { t: "", m: "주문 동의에 동의하지 않으셨습니다.<br>주문 동의에 동의해 주시기 바랍니다.", b: "확인" }
+	,MSG_1005 : { t: "", m: "비밀번호를 입력해 주세요.", b: "확인" }
+	,MSG_1006 : { t: "", m: "비밀번호가 일치하지 않습니다.", b: "확인" }
+	,MSG_1007 : { t: "", m: "배송지이름을 입력하세요.", b: "확인" }
+	,MSG_1008 : { t: "", m: "수령인을 입력하세요.", b: "확인" }
+	,MSG_1009 : { t: "", m: "휴대폰번호를 입력하세요.", b: "확인" }
+	,MSG_1010 : { t: "", m: "주소를 입력하세요.", b: "확인" }
+	,MSG_1011 : { t: "", m: "잠시 후 이용해 주시기 바랍니다.", b: "확인" }
+	,MSG_1012 : { t: "", m: "이메일을 입력하세요.", b: "확인" }
+	,MSG_1013 : { t: "", m: "이름을 입력하세요.", b: "확인" }
+	,MSG_1014 : { t: "", m: "생년월일을 입력하세요.", b: "확인" }
+	,MSG_1015 : { t: "", m: "아이디를 입력하세요.", b: "확인" }
+	,MSG_1016 : { t: "", m: "인증번호를 입력하세요.", b: "확인" }
+	,MSG_1017 : { t: "", m: "전화번호를 입력하세요.", b: "확인" }
+	,MSG_1018 : { t: "", m: "윤선생 ON 사이트 이용약관에 동의해 주시기 바랍니다.", b: "확인" }
+	,MSG_1019 : { t: "", m: "개인정보의 수집 · 이용 등에 대한 안내에 동의해 주시기 바랍니다.", b: "확인" }
+	,MSG_1020 : { t: "", m: "베플리 서비스에 대한 안내에 동의해 주시기 바랍니다.", b: "확인" }
+	,MSG_1021 : { t: "", m: "개인정보의 제 3자 제공에 대한 안내에 동의해 주시기 바랍니다.", b: "확인" }
+	,MSG_1022 : { t: "", m: "보안 상태는 적합 이상인 경우만 가능합니다.", b: "확인" }
+	,MSG_1023 : { t: "", m: "비밀번호가 불일치 합니다.<br>비밀번호를 다시 확인 부탁 드립니다.", b: "확인" }
+	,MSG_1024 : { t: "", m: "베플리윤스닷컴의 계정 및 서비스 연동에 동의해 주시기 바랍니다.", b: "확인" }
+
+	// 로그인
+	,MSG_1101 : { t: "로그인 실패", m: "아이디/비밀번호를 확인하세요.", b: "확인" }
+	,MSG_1102 : { t: "윤스닷컴/베플리 회원", m: "윤스닷컴/베플리 회원입니다.<br>윤선생 ON 회원가입을 해주시기 바랍니다.", b: "확인" }	
+	,MSG_1103 : { t: "로그인 실패", m: "SNS로그인이 실패하였습니다.<br>다시 시도해주세요.", b: "확인" }
+	,MSG_1104 : { t: "윤스닷컴/베플리 회원", m: "윤스닷컴/베플리 회원으로 이미 가입된 고객이십니다.<br>베플리계정으로 로그인 해주세요.", b: "확인" }
+	,MSG_1105 : { t: "윤스닷컴/베플리 회원", m: "윤선생 ON 회원가입을 계속 진행해주세요.", b: "확인" }
+	,MSG_1106 : { t: "로그인 ", m: "로그인할수 없습니다.<br>탈퇴한 계정입니다.", b: "확인" }
+
+	// 아이디/비밀번호찾기
+	,MSG_1201 : { t: "아이디 찾기 실패", m: "입력하신 회원정보에 대한 아이디를 찾을 수 없습니다.<br>아이디 찾기를 다시 진행해 주세요.", b: "확인" }
+	,MSG_1202 : { t: "비밀번호 찾기 실패", m: "입력하신 회원정보에 대한 비밀번호를 찾을 수 없습니다.<br>비밀번호 찾기를 다시 진행해 주세요", b: "확인" }
+	,MSG_1203 : { t: "비밀번호 찾기 실패", m: "인증번호가 일치하지 않습니다.", b: "확인" }
+	,MSG_1204 : { t: "비밀번호 변경 확인", m: "비밀번호가 변경되었습니다.<br>확인 버튼을 클릭하시면 로그인 페이지로 이동합니다.", b: "확인" }
+
+	// 회원가입
+	,MSG_1301 : { t: "로그인 실패", m: "로그인 정보가 정확하지 않습니다.<br>베플리 아이디/비밀번호 찾기 서비스를 이용해 주세요.", b: "확인" }
+	,MSG_1302 : { t: "아이디 중복확인", m: " 는(은) 사용할 수 있는 아이디 입니다", b: "사용하기" }
+	,MSG_1304 : { t: "닉네임 중복확인", m: " 는(은) 사용할 수 있는 닉네임 입니다", b: "사용하기" }
+	,MSG_1306 : { t: "회원정보 입력", m: "아이디를 입력해 주세요.", b: "확인" }
+	,MSG_1307 : { t: "회원정보 입력", m: "이름을 입력해 주세요.", b: "확인" }
+	,MSG_1308 : { t: "회원정보 입력", m: "비밀번호를 입력해 주세요.", b: "확인" }
+	,MSG_1309 : { t: "회원정보 입력", m: "닉네임을 입력해 주세요.", b: "확인" }
+	,MSG_1310 : { t: "회원정보 입력", m: "전화번호를 입력해 주세요.", b: "확인" }
+	,MSG_1311 : { t: "회원정보 입력", m: "사용하시는 이메일을 입력해 주세요.", b: "확인" }
+	,MSG_1312 : { t: "회원정보 입력", m: "생년월일을 입력해 주세요.", b: "확인" }
+	,MSG_1313 : { t: "회원정보 입력", m: "상품 배송을 위한 주소를 입력해 주세요.", b: "확인" }
+	,MSG_1314 : { t: "회원정보 입력", m: "아이디 중복체크를 해주세요.", b: "확인" }
+	,MSG_1315 : { t: "회원정보 입력", m: "닉네임 중복체크를 해주세요.", b: "확인" }
+	,MSG_1316 : { t: "확인 요청", m: "윤선생 ON 회원입니다.<br>아이디/비밀번호 찾기 서비스를 이용해 주세요.", b: "확인" }
+	,MSG_1317 : { t: "아이디 확인", m: "3~16자의 영문자 또는 영문자+숫자를 입력해 주세요", b: "확인" }
+	,MSG_1318 : { t: "닉네임 확인", m: "닉네임을 3자이상 입력해주세요.", b: "확인" }
+	,MSG_1319 : { t: "확인 요청", m: "윤선생 ON 회원입니다.<br>로그인을 이용해 주세요.", b: "확인" }
+	,MSG_1320 : { t: "인증요청", m: "휴대폰 번호 인증요청을 해주세요.", b: "확인" }
+	,MSG_1321 : { t: "회원정보 입력", m: "학습자 이름을 입력해 주세요.", b: "확인" }
+	,MSG_1322 : { t: "탈퇴회원", m: "탈퇴회원은 60일 이후 재가입 가능합니다.", b: "확인" }
+	,MSG_1323 : { t: "회원정보 입력", m: "학습자 생년월일을 입력해 주세요.", b: "확인" }
+	
+	// 회원탈퇴
+	,MSG_1401 : { t: "", m: "회원탈퇴를 진행하시겠습니까?", b: "확인", c: "취소" }
+	,MSG_1402 : { t: "", m: "회원탈퇴가 완료되었습니다.", b: "확인" }
+	,MSG_1403 : { t: "", m: "정말 탈퇴하시겠습니까?<br>탈퇴 시 모든 정보가 삭제되니 신중하게 선택하시기 바랍니다.", b: "확인", c: "취소" }
+
+	// 본인인증
+	,MSG_1501 : { t: "", m: "본인인증이 실패하였습니다.(위변조)", b: "확인" }
+	,MSG_1502 : { t: "", m: "본인인증이 실패하였습니다.(인증정보없음)", b: "확인" }
+
+	// 이벤트
+	,MSG_2001 : { t: "신청 완료", m: "이벤트 참여를 완료하였습니다.", b: "확인" }
+	,MSG_2002 : { t: "신청 안내", m: "이미 참여한 이벤트입니다.", b: "확인" }
+	,MSG_2003 : { t: "이벤트 정보 입력", m: "이름을 입력해 주세요.", b: "확인" }
+	,MSG_2004 : { t: "이벤트 정보 입력", m: "자녀 나이를 입력해 주세요.", b: "확인" }
+	,MSG_2005 : { t: "이벤트 정보 입력", m: "주소를 입력해 주세요.", b: "확인" }
+	,MSG_2006 : { t: "이벤트 정보 입력", m: "휴대폰번호를 입력해 주세요.", b: "확인" }
+	,MSG_2007 : { t: "이벤트 정보 입력", m: "숫자만 입력해 주세요.", b: "확인" }
+	,MSG_2008 : { t: "", m: "개인정보 수집 및 이용에 동의해 주세요", b: "확인" }
+	,MSG_2009 : { t: "", m: "개인정보 제공에 동의해 주십시오.<br>개인정보 제공 미동의시 학습 상담이 불가능합니다.", b: "확인" }
+	,MSG_2010 : { t: "", m: "아웃풋 코칭 이벤트 신청은 회원만 가능합니다.", b: "확인" }
+	,MSG_2011 : { t: "신청 안내", m: "학습코드를 등록한 회원만 아웃풋 코칭 서비스 1회 무료 신청을 이용하실 수 있습니다. ", b: "확인" }
+	,MSG_2012 : { t: "이벤트 정보 입력", m: "상세주소를 입력해 주세요.", b: "확인" }
+	,MSG_2013 : { t: "이벤트 신청", m: "이미 아웃풋 코칭 서비스를 구매하신 회원은 신청이 불가합니다.", b: "확인" }
+	,MSG_2014 : { t: "", m: "SNS 회원은 아웃풋 코칭 신청이 불가합니다.<br> 윤선생 ON 회원가입을 해주세요.", b:"확인"}
+	,MSG_2015 : { t: "[설연휴 체험팩 배송 안내]", m: "체험팩 신청 감사 드립니다.<br>신청 날짜에 따른 배송기간을 참고해 주시고<br>행복한 설연휴 보내시기 바랍니다.<br><br>1/29 13시 이전 신청: 1/29 오후 발송<br>1/29 13시 이후 신청: 2/7 순차 발송", b:"확인"}
+
+	// 별도 팝업으로 처리
+	// ,MSG_2014 : { t: "", m: "회원님께서는 아웃풋 코칭 서비스를<br>무료로 1회 받으실 수 있습니다.<br>아웃풋 코칭 서비스 1회 무료 서비스를<br>이용하시려면 신청버튼을 눌러주세요.", b: "자세히보기", c:"신청하기" }
+
+	// 학습신청
+	,MSG_3001 : { t: "정기결제 안내", m: "회원님께서는 현재 정기결제 서비스 이용 중입니다.<br>정기결제는 ID당 1건만 등록할 수 있습니다.", b: "확인" }
+	,MSG_3002 : { t: "센터 추천 요청", m: "회원님의 회원정보를 기반으로 <br>센터 추천을 해드리도록 하겠습니다.<br>2일 이내(영업일 기준) 고객센터 또는 해당 센터에서<br>연락(전화 및 메시지) 드리도록 하겠습니다.", b: "확인" }
+	,MSG_3003 : { t: "센터 추천 요청", m: "이미 신청하셨습니다.<br>센터 추천 요청은 중복 신청 처리가 되지 않습니다.", b: "확인" }
+	,MSG_3004 : { t: "배정 센터 확인", m: "회원님에 배정된 센터 정보가 확인되지 않습니다.<br> 배정 센터를 선택하시고 결제를 진행해 주시기 바랍니다.", b: "확인" }
+	,MSG_3005 : { t: "학습코드 확인", m: "학습코드를 등록한 회원만 코칭서비스를 구매할 수 있습니다.", b:"확인"}
+	,MSG_3006 : { t: "상품 구매", m: "아웃풋 코칭 서비스를 구매하시겠습니까?", b:"확인", c: "취소"}
+	,MSG_3007 : { t: "바로 구매", m: "바로 구매하시겠습니까?", b:"확인", c: "취소"}
+	,MSG_3008 : { t: "상품 구매", m: "상품을 구매하시겠습니까?", b:"확인", c: "취소"}
+	,MSG_3009 : { t: "구매정보 오류", m: "잘못된 구매 정보입니다.", b:"확인"}
+	,MSG_3010 : { t: "", m: "SNS 회원은 아웃풋 코칭 구매가 불가합니다.<br> 윤선생 ON 회원가입을 해주세요.", b:"확인"}
+	,MSG_3011 : { t: "센터 추천 요청", m: "센터 추천 요청을 하시겠습니까?", b: "확인", c: "취소"}
+	,MSG_3012 : { t: "", m: "윤선생 ON 교재 판매 약관에 동의해 주시기 바랍니다.", b: "확인" }
+	,MSG_3013 : { t: "", m: "개인정보의 수집/이용에 대해 동의해 주시기 바랍니다.", b: "확인" }
+	,MSG_3014 : { t: "", m: "주문 동의를 해 주시기 바랍니다.", b: "확인" }
+	,MSG_3015 : { t: "", m: "개인정보의 수집·이용에 대한 안내에 동의해 주시기 바랍니다.", b: "확인" }
+	,MSG_3016 : { t: "", m: "개인정보의 제3자 제공에 대한 안내에 동의해 주시기 바랍니다.", b: "확인" }
+	,MSG_3017 : { t: "[2019년 구정기간 주문 배송 관련 안내]", m: "안녕하세요. <br>초통영 시리즈에 관심을 많이 기울여주셔서 감사합니다.<br>주문 날짜에 따른 배송기간을 참고해주시고 행복한 설연휴 보내시기 바랍니다.<br>1/29 13시 주문까지 29일 오후 발송<br>1/29 13시 이후 주문분부터 2/7 발송됩니다.<br>(주문량에 따라 순차 출고될 수 있음)<br>가족과 행복한 설연휴 보내세요.감사합니다.", b:"확인"}
+	,MSG_3018 : { t: "상품 구매", m: "상품이 선택되지 않았습니다.", b:"확인"}
+	,MSG_3019 : { t: "상품 구매", m: "센터가 선택되지 않았습니다.", b:"확인"}
+	,MSG_3020 : { t: "결제 안내", m: "회원님께서는 원스탑구매로 교재만 결제하셨습니다.<br>계속해서 아웃풋코칭서비스 결제를 진행하시겠습니까?", b:"계속결제하기", c:"닫기"}
+	,MSG_3021 : { t: "상품 구매", m: "시/도가 선택되지 않았습니다.", b:"확인"}
+
+	// 마이페이지
+	,MSG_4001 : { t: "비밀번호 변경 완료", m: "회원님께서 요청하신 비밀번호로<br>비밀번호 변경이 완료 되었습니다.", b: "확인" }
+	,MSG_4002 : { t: "회원정보 변경 완료", m: "요청하신 회원정보가 수정되었습니다.", b: "확인" }
+	,MSG_4003 : { t: "확인 요청", m: "선택한 배송지를 삭제하시겠습니까?", b: "확인", c: "취소" }
+	,MSG_4004 : { t: "배송지 변경 완료", m: "요청하신 배송지정보가 수정되었습니다.", b: "확인" }
+	,MSG_4005 : { t: "정기결제 해지 요청", m: "정기결제를 해지하시겠습니까?", b: "확인", c: "취소" }
+	,MSG_4006 : { t: "정기결제 해지 완료", m: "정기결제가 해지완료 되었습니다.", b: "확인" }
+	,MSG_4007 : { t: "주문취소 요청", m: "주문을 취소하시겠습니까?", b: "확인", c: "취소" }
+	,MSG_4008 : { t: "주문취소 완료", m: "주문취소가 완료되었습니다.", b: "확인" }
+	,MSG_4009 : { t: "환불 요청", m: "환불을 요청하시겠습니까?", b: "확인", c: "취소" }
+	,MSG_4010 : { t: "환불 요청 완료", m: "환불 요청이 완료되었습니다.", b: "확인" }
+	,MSG_4011 : { t: "", m: "결제자정보가 필요합니다.", b: "확인" }
+	,MSG_4012 : { t: "", m: "배송지정보가 필요합니다.", b: "확인" }
+	,MSG_4013 : { t: "", m: "결제방식이 선택되지않았습니다.", b: "확인" }
+	,MSG_4014 : { t: "비밀번호 변경", m: "현재 비밀번호가 맞지 않습니다. 다시 확인해 주세요.", b: "확인" }
+	,MSG_4015 : { t: "학습 결과 수신 휴대번호 변경 완료", m: "회원님께서 입력하신 연락처로<br>변경이 완료 되었습니다.", b: "확인" }
+	,MSG_4016 : { t: "학습 결과 수신 휴대번호 변경 실패", m: "회원님께서 입력하신 연락처로<br>변경이 실패 했습니다.", b: "확인" }
+	,MSG_4017 : { t: "상품 구매", m: "마지막 상품을 정기결제로 구매할 수 없습니다.", b: "확인" }
+	,MSG_4018 : { t: "", m: "이미 해지된 정기결제입니다.", b: "확인" }
+	,MSG_4019 : { t: "주문취소 불가", m: "이미 학습코드를 사용하여 주문취소가 불가합니다.", b: "확인" }
+	,MSG_4020 : { t: "환불신청 불가", m: "이미 학습코드를 사용하여 환불신청이 불가합니다.", b: "확인" }
+	,MSG_4021 : { t: "환불요청 불가", m: "원스탑구매 상품입니다.<br>교재 환불요청 이전에 먼저 아웃풋코칭서비스를 <br>환불요청 하세요.", b: "확인" }
+	,MSG_4022 : { t: "", m: "구글 계정을 연동해주세요.", b: "확인" }
+	,MSG_4023 : { t: "", m: "이미 사용중인 구글 계정입니다.", b: "확인" }
+	,MSG_4024 : { t: "", m: "스피킹톡이 성공적으로 등록되었습니다.<br>이제 내 폰에서 스피킹톡을 불러보세요.<br>\"OK Google, 윤선생 불러줘.\"", b: "닫기" }
+	,MSG_4025 : { t: "", m: "구글 연동 해제 및 닉네임을 초기화 하시겠습니까?<br>(학습 내역은 구글 계정에 저장되어 초기화 되지 않습니다.)", b: "확인", c: "취소" }
+	,MSG_4026 : { t: "", m: "학습 닉네임을 입력해 주세요.", b: "확인" }
+	,MSG_4027 : { t: "", m: "학습 닉네임은 3~15자의 영문자로 입력해 주세요.", b: "확인" }
+	,MSG_4028 : { t: "", m: "구글 계정 및 닉네임이 초기화되었습니다.<br>스피킹톡 재사용을 원하시면 구글 계정 및 닉네임을 다시 등록해주세요.", b: "확인"}
+	,MSG_4029 : { t: "환불 요청 취소", m: "환불 요청이 취소되었습니다.", b: "확인" }
+	,MSG_4030 : { t: "환불 요청 취소 실패", m: "환불 요청 상태가 아닙니다.", b: "확인" }
+	
+	//학습후기 신청 팝업
+	,MSG_5001 : { t: "후기 등록", m: "등록하시겠습니까?", b: "확인", c: "취소" }
+	,MSG_5002 : { t: "", m: "등록되었습니다. 소중한 후기 남겨주셔서 감사합니다.", b: "확인"}
+	,MSG_5003 : { t: "", m: "안타깝게도 가장 낮은 점수를 선택하셨습니다. 등록을 계속 진행하시겠습니까?", b: "확인", c: "취소" }
+	,MSG_5004 : { t: "", m: "후기 구분를(을) 입력하세요.", b: "확인" }
+	,MSG_5005 : { t: "", m: "후기 내용를(을) 입력하세요.", b: "확인" }
+	,MSG_5006 : { t: "", m: "평가 점수를(을) 입력하세요.", b: "확인" }
+	,MSG_5007 : { t: "", m: "수정되었습니다. 소중한 후기 남겨주셔서 감사합니다.", b: "확인" }
+	,MSG_5008 : { t: "후기 수정", m: "수정하시겠습니까?", b: "확인", c: "취소" }
+	,MSG_5009 : { t: "후기 삭제", m: "삭제하시겠습니까?", b: "확인", c: "취소" }
+	,MSG_5010 : { t: "", m: "삭제되었습니다. 더 나은 교육콘텐츠를 위해 최선을 다하겠습니다. 감사합니다.", b: "확인" }
+	,MSG_5011 : { t: "", m: "비정상적인 접근입니다.", b: "확인" }
+	,MSG_5012 : { t: "", m: "이미 후기를 등록하신 상품입니다.", b: "확인" }
+
+};
+
+// 팝업중첩수 관리
+var popupDepth = 0;
+
+/**
+ * 팝업호출 수 상태정보 공유 (팝업열기/닫기 시 호출필요)
+ * @param type push:팝업추가, pop:팝업닫기
+ */
+function popupState(type) {
+
+	switch(type) {
+	case 'push':
+		$('body').removeClass('fixed02').addClass('fixed02');
+		popupDepth = popupDepth + 1;
+		break;
+	default:
+	case 'pop':
+		popupDepth = popupDepth - 1;
+		if (popupDepth <= 0) {
+			$('body').removeClass('fixed02');
+			popupDepth = 0;
+		}
+		break;
+	}
+}
+
+/**
+ * 메시지 확인 팝업
+ * @param POP_MSG
+ * @param confirmCallback
+ */
+function popupMsgConfirm(info, confirmCallback, cancelCallback) {
+
+	popupState('push');
+
+	// 제목이 없는 경우
+	if (isEmpty(info.t)) {
+		$('#popupMsgConfirm .pop-txt-type01').hide();
+		$('#popupMsgConfirm .pop-txt-type02').hide();
+		$('#popupMsgConfirm .pop-txt-type03').html(info.m).show();
+	}
+	// 제목이 있는 경우
+	else {
+		$('#popupMsgConfirm .pop-txt-type03').hide();
+		$('#popupMsgConfirm .pop-txt-type01').html(info.t).show();
+		$('#popupMsgConfirm .pop-txt-type02').html(info.m).show();
+	}
+
+	// 취소버튼이 있는 경우
+	if (info.c) {
+		$('#popupMsgConfirm .pop-btn02-1').html(info.b ? info.b : "확인").show();
+		$('#popupMsgConfirm .pop-btn02-2').html(info.c ? info.c : "취소").show();
+		$('#popupMsgConfirm .pop-btn').hide();
+		$('#popupMsgConfirm .pop-btn02-1').off().on('click', function() {
+
+			popupState();
+			$('#popupMsgConfirm').hide();
+			if (confirmCallback) confirmCallback();
+		});
+		$('#popupMsgConfirm .pop-btn02-2').off().on('click', function() {
+
+			popupState();
+			$('#popupMsgConfirm').hide();
+			if (cancelCallback) cancelCallback();
+		});
+		$('#popupMsgConfirm .pop-close').off().on('click', function() {
+
+			popupState();
+			$('#popupMsgConfirm').hide();
+		});
+	}
+	// 확인버튼만 있는 경우
+	else {
+		$('#popupMsgConfirm .pop-btn').html(info.b ? info.b : "확인").show();
+		$('#popupMsgConfirm .pop-btn02-1').hide();
+		$('#popupMsgConfirm .pop-btn02-2').hide();
+		$('#popupMsgConfirm').find('.pop-btn').off().on('click', function() {
+
+			popupState();
+			$('#popupMsgConfirm').hide();
+			if (confirmCallback) confirmCallback();
+		});
+		$('#popupMsgConfirm').find('.pop-close').off().on('click', function() {
+
+			popupState();
+			$('#popupMsgConfirm').hide();
+		});
+	}
+	$('#popupMsgConfirm').show();
+}
+
+/**
+ * 아이디/닉네임 중복 팝업
+ * @param type 100: 아이디, 200: 닉네임
+ * @param param 아이디 또는 닉네임
+ * @param callback 콜백
+ */
+function promptCheckInfo(type, param, callback) {
+
+	 popupState('push');
+	var title, body, desc;
+	switch (type) {
+	case "100":
+		title = "아이디 중복확인";
+		body = "<span class='txt-extra-bold'>"+param+"</span> 는(은) 이미 등록된 아이디 입니다";
+		desc = "※  3~16자의 영문자 또는 영문자+숫자를 입력해 주세요";
+		$('input[name=promptInput]').prop('maxlength', 16);
+		break;
+	case "200":
+		title = "닉네임 중복확인";
+		body = "<span class='txt-extra-bold'>"+param+"</span> 는(은) 이미 등록된 닉네임 입니다";
+		desc = "※  3~12자의 한글, 영문(대소문자 구분)과 숫자 입니다";
+		$('input[name=promptInput]').prop('maxlength', 12);
+		break;
+	}
+	$('#promptCheck .pop-txt-type01').html(title);
+	$('#promptCheck .pop-txt-type02').html(body);
+	$('#promptCheck .pop-input-area .pop-txt-type02').html(desc);
+	$('#promptCheckBtn').off().on('click', function() {
+
+		var promptInput = $('input[name=promptInput]').val();
+		if (isEmpty(promptInput)) {
+			return false;
+		}
+		if (promptInput.length < 3) {
+			return false;
+		}
+
+		popupState();
+		callback(promptInput);
+		$('#promptCheck').hide();
+	});
+	$('#promptCheck .pop-close').off().on('click', function() {
+
+		popupState();
+		$('#promptCheck').hide();
+	});
+	$('#promptCheck').show();
+}
+</script>
+
+<!-- popupMsgConfirm -->
+<div id="popupMsgConfirm" class="popup" style="display: none;">
+	<div class="dim-bg"></div>
+	<div class="dim-contents">
+		<button type="button" class="pop-close"></button>
+		<h2 class="pop-txt-type01">
+		</h2>
+		<h3 class="pop-txt-type02">
+		</h3>
+		<h2 class="pop-txt-type03">
+		</h2>
+		<div class="pop-btn-area">
+			<button type="button" class="pop-btn"></button>
+			<button type="button" class="pop-btn02-1"></button>
+			<button type="button" class="pop-btn02-2"></button>
+		</div>
+	</div>
+</div>
+
+<!-- promptCheck -->
+<div id="promptCheck" class="popup" style="display: none;">
+	<div class="dim-bg"></div>
+	<div class="dim-contents size2">
+		<button type="button" class="pop-close"></button>
+		<h2 class="pop-txt-type01">
+			아이디 중복확인
+		</h2>
+		<h3 class="pop-txt-type02">
+			<span class="txt-extra-bold">chotong</span> 는(은) 이미 등록된 아이디 입니다
+		</h3>
+
+		<div class="pop-input-area">
+			<input name="promptInput" type="text" maxlength="16" class="input-basic" >
+			<button id="promptCheckBtn" type="button">중복확인</button>
+			<p class="pop-txt-type02">
+				※  3~16자의 영문자 또는 영문자+숫자를 입력해 주세요
+			</p>
+		</div>
+	</div>
+</div>
+
+<!-- 핸드폰 번호 입력 팝업 -->
+<div id="popupReportTel" class="popup size02 this" style="display: none;">
+	<div class="dim-bg"></div>
+	<div class="dim-contents">
+		<button type="button" class="pop-close"></button>
+		<h2 class="pop-txt-type01">
+			학습 결과 수신 휴대번호 변경
+		</h2>
+
+		<table class="table-basic option-333 mt30">
+			<tbody>
+				<tr class="line-cell rowspan-tr">
+					<th class="red-dot">휴대폰 번호</th>
+					<td>
+						<select name="phone1" class="select-basic w-sm">
+							<option value="010">010</option>
+							<option value="011">011</option>
+							<option value="016">016</option>
+							<option value="017">017</option>
+							<option value="018">018</option>
+							<option value="019">019</option>
+						</select>
+						<span class="txt-mid view-pc">-</span>
+						<input name="phone2" type="tel" maxlength="4" class="input-basic w-sm">
+						<span class="txt-mid view-pc">-</span>
+						<input name="phone3" type="tel" maxlength="4" class="input-basic w-sm">
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<div class="pop-btn-area">
+			<button type="button" class="pop-btn02-1">변경</button>
+			<button type="button" class="pop-btn02-2">취소</button>
+		</div>
+	</div>
+</div>
+
+<script>
+/**
+ * 아웃풋코칭 팝업
+ * @param confirmCallback
+ * @param cancelCallback
+ */
+function popupOutputCoach(confirmCallback, cancelCallback) {
+
+	popupState('push');
+	$('#popupOutput .pop-btn02-1').off().on('click', function() {
+
+		popupState();
+		$('#popupOutput').hide();
+		if (confirmCallback) confirmCallback();
+	});
+	$('#popupOutput .pop-btn02-2').off().on('click', function() {
+
+		popupState();
+		$('#popupOutput').hide();
+		if (cancelCallback) cancelCallback();
+	});
+	$('#popupOutput .pop-close').off().on('click', function() {
+
+		popupState();
+		$('#popupOutput').hide();
+	});
+	$('#popupOutput').show();
+}
+</script>
+
+<!-- 아웃풋코칭  -->
+<div id="popupOutput" class="popup size03" style="display: none;">
+	<div class="dim-bg"></div>
+	<div class="dim-contents">
+		<button type="button" class="pop-close"></button>
+		<img class="popup-logo" src="/portal/resources/img/common/main_logo.png" alt="초통영 메인로고">
+		<h3 class="pop-txt-type04">
+			회원님께서는 아웃풋 코칭 서비스를 무료로 1회 받으실 수 있습니다.
+		</h3>
+		<h3 class="pop-txt-type04">
+			아웃풋 코칭 서비스 1회 무료 서비스를 이용하시려면 신청버튼을 눌러주세요.
+		</h3>
+
+		<div class="pop-btn-area">
+			<button type="button" class="pop-btn02-1">자세히보기</button>
+			<button type="button" class="pop-btn02-2">신청하기</button>
+		</div>
+	</div>
+</div>
+	
+<script>
+/**
+ * 팝업 공지
+ */
+function popupNotice() {
+	
+	if(GetCookie('noticePop_1') != 'N') {
+		$('#noticePop_1').show();
+	}
+	
+	$('.noticePop-close').off().on('click', function() {
+		$(this).closest('.noticePop').hide();
+	});
+	$('.noticePop-close2').off().on('click', function() {
+		$(this).closest('.noticePop').hide();
+	});
+	$('.noticePop-check > input[type=checkbox]').off().on('click', function() {
+		setCookieWithTimeout('noticePop_1', 'N', 3600*24);
+		$(this).closest('.noticePop').hide();
+	});
+}
+
+</script>
+
+<!-- 팝업 공지 -->
+<div class="noticePop-wrap">
+	<div id="noticePop_1" class="noticePop" style="display: none;">
+		<button type="button" class="noticePop-close"></button>
+		<div class="noticePop-contents">
+			<img src="/portal/resources/img/temp/notice_popup_220407.png" />
+		</div>
+		<div class="noticePop-check">
+			<input type="checkbox" id="noticePop-check1" />
+			<label for="noticePop-check1">오늘 하루 보지 않기</label>
+			<button type="button" class="noticePop-close2">[× 닫기]</button>
+		</div>
+	</div>
+</div>
+
+
+	<div id="btn-top" style="z-index:499;">
+		<div class="btn-top-cont">TOP <i class="icon-top"></i></div>
+	</div>
+	
+
+
+<footer id="footer">
+	<div class="footer-contents">
+		<div class="footer-txt-area">
+			<ul class="footer-link clearfix">
+				<li><a href="http://www.yoons.com/intro/yoonsSubmain.ys" target="_blank">회사소개</a></li>
+				<li><a href="/portal/page/terms/policy.html">이용약관</a></li>
+				<li><a href="/portal/page/terms/privacy.html" class="txt-yellow">개인정보처리방침</a></li>
+				<li>
+					<div class="fl mr20">
+						대표전화 : <input type="text" class="footer-call" readonly value="1588-0594">
+					</div>
+				</li>
+				<li class="txt-666">평일 9시~12시, 13시~18시 (토,일,공휴일 휴무)</li>
+			</ul>
+
+			<ul class="footer-link clearfix">
+				<li><a href="https://online.yoons.com/center" target="_blank">판매자 사이트</a></li>
+				<!-- <li><a href="https://online.yoons.com/admin" target="_blank">어드민</a></li> -->
+			</ul>
+
+			<ul class="footer-info clearfix">
+				<li>서울시 강동구 강동대로 207(강동구 성내동 448-11)</li>
+				<li>
+					<span class="bar">대표이사 김성중</span>
+					<span class="bar">(주)이이씨엘리트</span>
+					<span class="bar">사업자등록번호 <input type="text" class="footer-num" value="212-81-32555"></span>
+				</li>
+				<li>통신판매업자신고번호 :  제2009-서울강동-0221호</li>
+				<li>Copyright ⓒ YOONS ENGLISH SCHOOL Since 1980</li>
+			</ul>
+		</div>
+
+		<form name="KB_AUTHMARK_FORM" method="get">
+			<input type="hidden" name="page" value="B009111" />
+			<input type="hidden" name="cc" value="b010807:b008491" />
+			<input type="hidden" name="mHValue" value='bd4abbdd8216e118299fdbdab40fde5920181214093378' />
+		</form>
+
+		<div class="footer-logo" onclick="onPopKBAuthMark();"></div>
+
+		<div class="select-area">
+			<select class="select-link" onchange="window.open(this.value)">
+				<option value ="#0" readonly="" hidden="">패밀리 사이트</option>
+				<option value="http://www.yoons.com">윤선생</option>
+				<option value="https://wellstudy.yoons.com">윤선생 웰스터디</option>
+				<option value="https://basic.yoons.com">윤선생 베이직</option>
+				<option value="http://igseacademy.com">윤선생 IGSE아카데미</option>
+				<option value="http://www.yoonskids.com">윤선생 스마트랜드</option>
+				<option value="https://www.junglebeat.co.kr">윤선생 정글비트</option>
+			</select>
+		</div>
+	</div>
+</footer>
+
+
+<!-- 초통영 푸터 국민은행 마크 클릭 -->
+<script>
+	function onPopKBAuthMark() {
+		window.open('','KB_AUTHMARK','height=604, width=648, status=yes, toolbar=no, menubar=no, location=no');
+		document.KB_AUTHMARK_FORM.action='http://escrow1.kbstar.com/quics';
+		document.KB_AUTHMARK_FORM.target='KB_AUTHMARK';
+		document.KB_AUTHMARK_FORM.submit();
+	}
+</script>
+
+	
+	<input type="hidden" name="_reseller" value="" />
+	
+	<script src="/portal/resources/js/common.js?v=201905271345 "></script>
+	
+	<script src="/portal/resources/js/channel.io.js?v=201905271345 "></script>
+	
+	<script type="text/javascript" src="https://wcs.naver.net/wcslog.js"> </script>
+	
+</body>
+</html>
